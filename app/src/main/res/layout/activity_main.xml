@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.hoangtuan.modulescreenshort.MainActivity">
+<android.support.v7.widget.Toolbar
+    android:background="@color/colorPrimary"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"></android.support.v7.widget.Toolbar>
+
+    <CheckBox
+        android:id="@+id/cbStart"
+        android:button="@android:color/transparent"
+        android:textAlignment="center"
+        android:layout_margin="20dp"
+        android:textColor="#ffffff"
+android:background="@drawable/custom_radio"
+        android:text="Bắt đầu chụp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/swFloat"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Tạo nút nổi"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/swLac"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Lắc để chụp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/swCombo"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Nút Combo"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+</LinearLayout>
