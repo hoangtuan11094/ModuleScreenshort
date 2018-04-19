@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 // Will display the notification in the notification bar
         notificationManager.notify(1, builder.build());
     }
-
+//==
     public void cancelNotification() {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(1); // Notification ID to cancel
