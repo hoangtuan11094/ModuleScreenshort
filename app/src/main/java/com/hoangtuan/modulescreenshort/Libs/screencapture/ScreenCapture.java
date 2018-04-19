@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -39,6 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.hoangtuan.modulescreenshort.Libs.screencapture.FileUtil.SCREENCAPTURE_PATH;
 
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
 public class ScreenCapture {
 
     private static String TAG = ScreenCapture.class.getName();
@@ -102,7 +104,9 @@ Context contextx;
         DisplayMetrics displayMetrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(displayMetrics);
         mScreenDensity = displayMetrics.densityDpi;
-        mImageReader = ImageReader.newInstance(mWindowWidth, mWindowHeight, 0x1, 2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mImageReader = ImageReader.newInstance(mWindowWidth, mWindowHeight, 0x1, 2);
+        }
 
         mMediaProjectionManager = (MediaProjectionManager) mActivity.
                 getSystemService(Context.MEDIA_PROJECTION_SERVICE);
@@ -110,11 +114,13 @@ Context contextx;
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void screenCapture() {
         isScreenshot = true;
         if (startScreenCapture()) {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
+                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                 @Override
                 public void run() {
                     Log.d(TAG, "start startCapture");
@@ -124,6 +130,7 @@ Context contextx;
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void startCapture() {
         Random random=new Random();
         int a=random.nextInt();
@@ -166,6 +173,7 @@ Context contextx;
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void stopScreenCapture() {
         if (mVirtualDisplay != null) {
             mVirtualDisplay.release();
@@ -173,6 +181,7 @@ Context contextx;
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private boolean startScreenCapture() {
         Log.d(TAG, "startScreenCapture");
         if (this == null) {
@@ -195,6 +204,7 @@ Context contextx;
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setUpVirtualDisplay() {
         if (isScreenshot) {
             mVirtualDisplay = mMediaProjection.createVirtualDisplay("ScreenCapture",
@@ -204,6 +214,7 @@ Context contextx;
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setUpMediaProjection() {
         mMediaProjection = mMediaProjectionManager.getMediaProjection(mResultCode, mResultData);
     }
@@ -233,6 +244,7 @@ Context contextx;
         isScreenshot=false;
 
     }
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void release() {
         mIsQuit.set(false);
         mMuxerStarted = false;
@@ -243,6 +255,7 @@ Context contextx;
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult requestCode:" + requestCode + " resultCode:" + resultCode);
         if (requestCode == REQUEST_MEDIA_PROJECTION) {
@@ -284,6 +297,8 @@ Context contextx;
         }
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void cleanup() {
         if (mBitmap != null) {
             mBitmap.recycle();

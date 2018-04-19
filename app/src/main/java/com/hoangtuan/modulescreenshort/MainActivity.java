@@ -9,10 +9,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,8 +25,13 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+
 import com.hoangtuan.modulescreenshort.Libs.screencapture.FloatWindowsService;
 import com.hoangtuan.modulescreenshort.Libs.screencapture.ScreenCapture;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private ScreenCapture mScreenCapture;
@@ -36,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     CheckBox cbStartStop;
     public static final int REQUEST_MEDIA_PROJECTION = 18;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,51 +54,55 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         onEvent();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startCapture() {
         if (mScreenCapture != null) {
             mScreenCapture.screenCapture();
         }
     }
 
+
     private void onEvent() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            if (mScreenCapture == null)
+                mScreenCapture = new ScreenCapture(this);
+        }
+            cbStartStop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked){
+                        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+                        camBienRung = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                        cbStartStop.setText("Dừng lại...!");
+                        startSevice();
+                        if (swFloat.isChecked()){
+                            requestCapturePermission();
+                        }else {
+                            stopService(new Intent(getApplicationContext(), FloatWindowsService.class));
+                        }
+                        if (swLac.isChecked()){
 
-        if (mScreenCapture == null)
-            mScreenCapture = new ScreenCapture(this);
+                            Toast.makeText(MainActivity.this, "Đã chọn chế độ rung để chụp hình", Toast.LENGTH_SHORT).show();
+                            if (camBienRung == null) {
+                                Toast.makeText(getApplicationContext(), "Máy của bạn không có cảm biến gia tốc", Toast.LENGTH_SHORT).show();
+                            } else {
 
-        cbStartStop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-                    camBienRung = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-                    cbStartStop.setText("Dừng lại...!");
-                    startSevice();
-                    if (swFloat.isChecked()){
-                        requestCapturePermission();
+                                sensorManager.registerListener(MainActivity.this, camBienRung, SensorManager.SENSOR_DELAY_NORMAL);
+                            }
+                        }
+                        else {
+                            sensorManager.unregisterListener(MainActivity.this, camBienRung);
+                        }
                     }else {
+                        stopSevice();
+                        cbStartStop.setText("Bắt đầu...!");
+                        sensorManager.unregisterListener(MainActivity.this, camBienRung);
                         stopService(new Intent(getApplicationContext(), FloatWindowsService.class));
                     }
-                    if (swLac.isChecked()){
-
-                        Toast.makeText(MainActivity.this, "Đã chọn chế độ rung để chụp hình", Toast.LENGTH_SHORT).show();
-                        if (camBienRung == null) {
-                            Toast.makeText(getApplicationContext(), "Máy của bạn không có cảm biến gia tốc", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(MainActivity.this, "Đã tắt chế độ rung để chụp hình", Toast.LENGTH_SHORT).show();
-                            sensorManager.registerListener(MainActivity.this, camBienRung, SensorManager.SENSOR_DELAY_NORMAL);
-                        }
-                    }
-                    else {
-                        sensorManager.unregisterListener(MainActivity.this, camBienRung);
-                    }
-                }else {
-                    stopSevice();
-                    cbStartStop.setText("Bắt đầu...!");
-                    sensorManager.unregisterListener(MainActivity.this, camBienRung);
-                    stopService(new Intent(getApplicationContext(), FloatWindowsService.class));
                 }
-            }
-        });
+            });
+
+
 
     }
 
@@ -133,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -169,10 +183,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         builder.setOngoing(true); // Cant cancel your notification (except NotificationManger.cancel(); )
 
 // Content title, which appears in large type at the top of the notification
-        builder.setContentTitle("Notifications Title");
+        builder.setContentTitle("Screenshot");
 
 // Content text, which appears in smaller text below the title
-        builder.setContentText("Your notification content here.");
+        builder.setContentText("App is runing....");
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -203,7 +217,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 float speed = Math.abs(x + y + z - lastX - lastY - lastZ) / diffTime * 100;
 
                 if (speed > 5) {
-                    startCapture();
+//
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        startCapture();
+                    }
+                }
+
+
+
                 }
                 lastX = x;
                 lastY = y;
@@ -211,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             }
         }
-    }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -236,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
